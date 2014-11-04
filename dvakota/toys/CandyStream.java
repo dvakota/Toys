@@ -1,12 +1,15 @@
 package dvakota.toys;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 /**
  * Date: 11/3/14
  * /r/dailyprogrammer shoutout! Easy Halloween challenge as a kitchen-job
- * Stream implementation. Import and go trick-or-treating.
+ * Generator implementation. Import and go trick-or-treating.
  */
 public class CandyStream {
     static Random r = new Random();
@@ -26,7 +29,7 @@ public class CandyStream {
 
     /* Takes an array of candy names you want to be given
     Choose your own diabetic adventure */
-    public CandyStream(String... names) {
+    public CandyStream(String[] names) {
         stash = new HashMap<String, Integer>();
         candyNames = Arrays.asList(names);
         init();
@@ -35,7 +38,7 @@ public class CandyStream {
     /* Takes an array of your favorite candy names and the max possible amount
     you hope to receive at each house.
      */
-    public CandyStream(int maxAmount, String... names) {
+    public CandyStream(int maxAmount, String[] names) {
         stash = new HashMap<String, Integer>();
         candyNames = Arrays.asList(names);
         init(maxAmount);
@@ -44,15 +47,31 @@ public class CandyStream {
 
     /* read original input from file */
     public void init (String fileName) throws Exception {
-        File f = new File(fileName);
-        Scanner sc = new Scanner(f);
+        URL url = null;  Scanner sc = null;
+        try {
+            url = new URL(fileName);
+        }  catch (MalformedURLException e) { }
+        if (url == null) {
+            File f = new File(fileName);
+            sc = new Scanner(f);
+        } else {
+            InputStream is = url.openStream();
+            sc = new Scanner(is);
+        }
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
             String name = line.trim();
-            int stashAmt = stash.get(name);
+            Integer stashAmt = stash.get(name);
+            if (stashAmt == null) stashAmt = 0;
             stash.put(name, stashAmt + 1);
             runningTotal += 1;
         }
+    }
+
+    public void init(int maxAmount, String fileName) throws Exception {
+        amountRange = maxAmount;
+        init(fileName);
+
     }
 
     /* if there's no input file, check if Names have been initialized.
@@ -117,7 +136,7 @@ public class CandyStream {
         System.out.println(o);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String[] names = {"Nerds", "PayDay", "Mars", "Twix", "Hershey's mini"};
         CandyStream c = new CandyStream(names);
         c.say("Original candy stash:");
@@ -128,5 +147,12 @@ public class CandyStream {
         }
         c.say("Final candy stash");
         c.stats();
+
+        String url = System.getProperty("user.dir")+"/186easy.txt";
+
+        CandyStream fc = new CandyStream();
+        fc.init(url);
+        fc.say("Original stash as read from file");
+        fc.stats();
     }
 }
