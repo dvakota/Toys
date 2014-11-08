@@ -48,7 +48,7 @@ public class Graph {
             List<Edge> edgesToUpdate = p.edges;
             logs -= floatin;
 
-            /* Some of the edges will have negative capacity after an update.
+            /* Some of the edges will have zero capacity after an update.
             The paths containing them (including the edge we just used) will be skipped */
             if (floatin > 0) System.out.printf("Updated path capacities: %s\n", p.toString());
             for (int i = logNo; i < logNo + floatin; i++) {
@@ -58,13 +58,10 @@ public class Graph {
             if (floatin > 0) System.out.printf("%d logs remaining\n\n", logs);
 
             updateCapacities(edgesToUpdate, floatin);
-            for (Path updatePath : paths) {
-                updatePath.setMinCapacity();
+            for (Path pathToUpdate : paths) {
+                pathToUpdate.setMinCapacity();
             }
             logNo += floatin;
-
-            //re-sort the paths after some capacities have been updated
-            java.util.Collections.sort(paths);
         }
 
         if (logs > 0) {

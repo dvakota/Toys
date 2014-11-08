@@ -65,7 +65,7 @@ public class Logrunner {
         int vertices = 9;
 
         System.out.println("***********************************");
-        System.out.printf("Seinding %d logs down the river\n", logs);
+        System.out.printf("Sending %d logs down the river\n", logs);
         System.out.println("***********************************\n");
 
         Graph river = new Graph(vertices, test);
@@ -78,9 +78,9 @@ public class Logrunner {
             if (v >=0) numberOfVertices++;
         }
 
-        logs = new Random().nextInt(30);
+        logs = new Random().nextInt(9);
         System.out.println("***********************************");
-        System.out.printf("Seinding %d logs down the river\n", logs);
+        System.out.printf("Sending %d logs down the river\n", logs);
         System.out.println("***********************************\n");
 
         Graph river1 = new Graph(numberOfVertices, fromFile);
