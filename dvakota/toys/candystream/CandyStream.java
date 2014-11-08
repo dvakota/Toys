@@ -1,4 +1,4 @@
-package dvakota.toys;
+package dvakota.toys.candystream;
 
 import java.io.File;
 import java.io.InputStream;
