@@ -1,17 +1,50 @@
 package dvakota.toys.logrunner;
 
+import java.io.File;
+import java.net.URL;
 import java.util.*;
 
 /**
  * Date: 11/7/14
  * DailyProgrammer Challenge #187 - Hard
  * Shortest path single-pair optimal network flow problem
+ * Test runner (supports input from file as well as hardcoded values)
  */
 public class Logrunner {
+    static int[] vertices = new int[26];
 
+    public static Edge[] input(String file) throws Exception {
+        Arrays.fill(vertices, -1);
+        Scanner sc = new Scanner(Logrunner.class.getResource(file).openStream());
+        List<Edge> result = new LinkedList<Edge>();
+        while (sc.hasNext()) {
+            String line = sc.nextLine();
+            if (line.length() == 0) continue;
+            String[] tokens = line.split("\\s*-[\\s*\\>]");
+            int node1, node2, capacity;
+            node1 = node2 = capacity = -1;
+            for (String token : tokens) {
+                String t = token.trim();
+                if (token.trim().length() == 1) {
+                    if (node1 == -1) node1 = t.charAt(0) - 'A';
+                    else node2 = t.charAt(0) - 'A';
+                } else {
+                    String[] words = token.split("\\s+");
+                    capacity = Integer.parseInt(words[1].trim());
+                }
+                if (node1 >=0 && node2 >= 0 && capacity > 0 && node1 != node2) {
+                    Edge edge = new Edge(node1, node2, capacity);
+                    result.add(edge);
+                    vertices[node1]++; vertices[node2]++;
+                }
+            }
+        }
+        Edge[] edgeArray = new Edge[result.size()];
+        result.toArray(edgeArray);
+        return edgeArray;
+    }
 
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Edge[] test = new Edge[13];
         test[0] = new Edge(0, 1, 6);
@@ -37,5 +70,20 @@ public class Logrunner {
 
         Graph river = new Graph(vertices, test);
         river.getOptimalFlow(logs);
+
+        System.out.println("Test input from file\n\n");
+        Edge[] fromFile = Logrunner.input("logrunner.txt");
+        int numberOfVertices = 0;
+        for (int v : Logrunner.vertices) {
+            if (v >=0) numberOfVertices++;
+        }
+
+        logs = new Random().nextInt(30);
+        System.out.println("***********************************");
+        System.out.printf("Seinding %d logs down the river\n", logs);
+        System.out.println("***********************************\n");
+
+        Graph river1 = new Graph(numberOfVertices, fromFile);
+        river1.getOptimalFlow(logs);
     }
 }

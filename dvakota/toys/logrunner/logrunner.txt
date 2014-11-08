@@ -1,0 +1,15 @@
+
+    A->B - holds 6 log paths
+    A->C - holds 2 log paths
+    B->E - holds 3 log paths
+    B->D - holds 3 log paths
+    D->C - holds 2 log paths
+    D->F - holds 1 log path
+    C->G - holds 5 log paths
+    E->H - holds 1 log paths
+    E->I - holds 2 log paths
+    F->H - holds 1 log path
+    G->H - holds 2 log paths
+    G->I - holds 2 log paths
+    H->I - holds 4 log paths
+
