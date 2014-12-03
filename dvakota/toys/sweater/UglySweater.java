@@ -16,28 +16,19 @@ public class UglySweater {
             payload = repeat(str, t, false);
         }
 
-        public String mirror(String s, int t) {
-            String result = s;
-            for (int i = 0; i < t; i++) {
-                String mirror = reverse(s);
-                result += mirror;
-            }
-            return result;
+        public Sequence(String str, int t, boolean mirror) {
+            payload = repeat(str, t, mirror);
         }
 
-        public Sequence(String str, int t, boolean reverse) {
-            payload = repeat(str, t, reverse);
+        public Sequence(Sequence s, int t, boolean mirror) {
+            this(s.payload, t, mirror);
         }
 
-        public Sequence(Sequence s, int t, boolean reverse) {
-            this(s.payload, t, reverse);
-        }
-
-        public String repeat(String s, int times, boolean reverse) {
+        public String repeat(String s, int times, boolean mirror) {
             if (times < 1) return s;
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < times; i++) {
-                if (reverse) {
+                if (mirror && (i % 2 != 0)) {
                     result.append(reverse(s));
                 }
                 else result.append(s);
@@ -122,7 +113,6 @@ public class UglySweater {
     public static void main(String[] args) {
         String token = "(rb * 2, g * 5), x*3) % 2";
         token = "((a *3, b * 2) * 2, x*4) % 2";
-        token = "(abcd * 1, x*4) % 2";
         Stack<Integer> returnPoint = new Stack<Integer>();
         returnPoint.push(token.length() - 1);
         Sequence s = parse1(token.toCharArray(), returnPoint);
