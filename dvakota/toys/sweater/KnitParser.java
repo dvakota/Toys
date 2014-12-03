@@ -64,14 +64,15 @@ public class KnitParser {
                 Sequence s = expr.pop();
                 while (next != '(') {
                     say(next);
-                    if (next != ',') throw new RuntimeException("Bad string" + str);
-                    expr.push(expr.pop().concatenate(s));
+                    if (next != ',') throw new RuntimeException("Bad string " + str);
+                    s = (expr.pop().concatenate(s));
                     next = op.pop();
                 }
+                expr.push(s);
                 continue;
             }
             if (c >= '0' && c <= '9' ) {
-                if (expr.isEmpty() || op.isEmpty()) throw new RuntimeException("Bad string" + str);
+                if (expr.isEmpty() || op.isEmpty()) throw new RuntimeException("Bad string " + str);
                 Sequence seq = new Sequence(expr.pop(), op.pop(), c - '0');
                 expr.push(seq);
                 continue;
@@ -79,9 +80,10 @@ public class KnitParser {
             if ((""+c).matches("[a-zA-Z]")) {
                 expr.push(new Sequence(c, '*', 1));
             }
-            say(expr.peek().payload);
+            if (expr.isEmpty()) throw new RuntimeException("Bad string " + str);
+
         }
-        if (expr.isEmpty() || expr.size() > 1) throw new RuntimeException("Bad string");
+        if (expr.isEmpty() || expr.size() > 1) throw new RuntimeException("Bad string " + str);
         return (expr.pop().payload);
     }
 
@@ -89,7 +91,7 @@ public class KnitParser {
         say(new Sequence('a', '*', 5).payload);
         say (new Sequence(new Sequence('s', '*', 3)).payload);
         // String line = "(d*4, (s*2, f*5)) * 2";
-        String line = "(a*8, b*5) % 2";
+        String line = "(s*7, (a*8, (b*5)) * 3) % 2";
         say(parse(line));
     }
 
