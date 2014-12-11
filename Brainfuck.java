@@ -13,7 +13,7 @@ public class Brainfuck {
     String source;
 
     public Brainfuck(String src, String in) {
-        data = new byte[src.length()];
+        data = new byte[2000];
         input = new byte[in.length()];
         callStack = new Stack<Integer>();
         String[] values = in.split("\\s+"); int i = 0;
@@ -32,7 +32,7 @@ public class Brainfuck {
                     say("Error - invalid chacarter " + c);
                     return;
                 }
-                if (skip == 0) repl(c, ip);
+                repl(c, ip);
             } catch (StringIndexOutOfBoundsException e) {
                 say("DONE");
                 return;
@@ -41,44 +41,48 @@ public class Brainfuck {
     }
 
     void repl(char b, int ip) {
-        if (b == '>') {say("Move one right"); dataIndex++;}
-        if (b == '<') {say("Move one left"); dataIndex--;}
-        if (b == '+') {say("Increment data"); data[dataIndex]++;}
-        if (b == '-') {say("Decrement data"); data[dataIndex]--;}
-        if (b == ':') {say("Printing"); say(data[dataIndex]);}
-        if (b == ';') {data[dataIndex] = input[inputIndex++]; say("Input data " +data[dataIndex]);}
-        if (b == '[') {
-
-            if (data[dataIndex] == 0) {
-                skip++;
-            } else {
-                callStack.push(ip + 1);
-                lastIp = ip + 1;
-                say("Entering loop");
+        if (skip == 0) {
+            if (b == '>') dataIndex++;
+            if (b == '<') dataIndex--;
+            if (b == '+') data[dataIndex]++;
+            if (b == '-') data[dataIndex]--;
+            if (b == ':') say(data[dataIndex]);
+            if (b == ';') data[dataIndex] = input[inputIndex++];
+            if (b == '[') {
+                if (data[dataIndex] == 0) {
+                    skip++;
+                } else {
+                    callStack.push(lastIp = ip + 1);
+                }
             }
         }
         if (b == ']') {
             if (skip < 0)
-                throw new RuntimeException("Bad syntax at " + ip +": mismatched bracket");
-            if (skip-- > 0) return;
+                throw new RuntimeException("Bad syntax at "
+                                                       + ip + ": mismatched bracket");
+            if (skip > 0) {
+                skip--;
+                return;
+            }
             if (data[dataIndex] != 0) {
-                say("Repeating loop");
                 callStack.push(lastIp);
-
-            } else {
-                say("Exiting loop");
             }
         }
     }
-
 
     public static void say(Object o) {
         System.out.println(o);
     }
 
     public static void main(String[] args) {
-        Brainfuck brain = new Brainfuck(";>;<[->+<[++>--<]]:>:", "2 5");
-        brain.process();
+        String stream = ";>;<[->+>+<<]>>[-<<+>>]<<+:>-:<+++>;<>++++<[>+<-]" +
+                                    "[->++<]>++++<>;<>:<>;<>:<:>;<+:>-:<+:>-:<>;" +
+                                    "<[->+<]+++;>++++<[->++<][->+>++<<]+:>-:<[->+<]" +
+                                    ">++++<>++++<:>-<+:>-:<>-<>-<>-<+++[->++<]>+++" +
+                                    "+<[->+>++<<]::>:";
+        String input = "12 16 15 6 15 11 4 16";
+        Brainfuck bfi = new Brainfuck(stream, input);
+        bfi.process();
     }
 }
 
