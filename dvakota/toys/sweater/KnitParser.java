@@ -94,7 +94,7 @@ public class KnitParser {
             }
 
             if (c == ')') {
-                if (op.isEmpty()) throw new RuntimeException("Bad string" + str);
+                if (op.isEmpty()) throw new RuntimeException("Bad string " + str);
                 char next = op.pop();
                 Sequence s = expr.pop();
                 while (next != '(') {
@@ -125,7 +125,7 @@ public class KnitParser {
                 continue;
             }
 
-            if ((""+c).matches("[a-zA-Z]")) {
+            if ((""+c).matches("[a-z]")) {
                 Sequence s = new Sequence(c, '*', 1);
                 expr.push(s);
             }
