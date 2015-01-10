@@ -1,6 +1,8 @@
 package dvakota.toys.sweater;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -143,8 +145,18 @@ public class KnitParser {
         return result;
     }
 
+    public static <T> void met(Iterable<? super T> it) {
+
+
+    }
+
     public static void main(String[] args) throws Exception {
+        String s = "1# b*2, ((a*2, b*1, c*2)%2)*2, b*2";
+        say(KnitParser.parse(s));
         String fileName = "";
+
+        List<String> li = new ArrayList<String>();
+        KnitParser.met(li);
 
         if (args.length== 0) {
             say("Input file required, please specify name and full path to the file and press Enter");
