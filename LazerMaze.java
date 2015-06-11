@@ -1,9 +1,15 @@
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.*;
 
-/**
- * Date: 1/9/15
- */
+/*
+ Facebook Hacker Cup 2015 Qualification Round
+ Problem 3: Lazer Maze
+ author: Galina Khayut
+ Date: 01/09/2015
+*/
+
 public class LazerMaze {
     public static final int NORTH = 0;
     public static final int EAST = 1;
@@ -14,9 +20,8 @@ public class LazerMaze {
     int width;
 
     Cell[][] board;
-    Maze currentState;
-    Set<Maze> moves;
-    List<Stack<Cell>> allPaths;
+    MazeState currentState;
+    Map<MazeState, MazeState> visited;
     Cell start;
     Cell end;
     int min = Integer.MAX_VALUE;
@@ -24,145 +29,50 @@ public class LazerMaze {
 
     public LazerMaze(int height, int width, List<String> input) {
         init(height, width, input);
-        currentState = new Maze(start, 0);
     }
 
-
-    private boolean isValidMove(int x, int y) {
-        return ((x < width && x >= 0) &&
-                            (y < height && y >= 0));
-
-    }
-    private boolean isValidState(Maze newState) {
-        if (!newState.cell.isEmpty) return false;
-        if (moves.contains(newState)) return false;
-        return !isVulnerable(newState);
-    }
-
-    private Maze[] validMoves(Maze currentState) {
-        Cell current = currentState.cell;
-        int newSteps = currentState.steps + 1;
-        Maze[] result = new Maze[4];
-        for (int y = -1; y < 2; y++) {
-            if (y != 0) {
-                int cy = current.y + y;
-                if (isValidMove(current.x, cy))  {
-                    Maze newState = new Maze(board[cy][current.x], newSteps);
-                    if (isValidState(newState)) {
-                        result[y + 1] = newState ;
-                    }
-                }
-            }
-        }
-        for (int x = -1; x < 2; x++) {
-            if (x != 0) {
-                int cx = current.x + x;
-                if (isValidMove(cx, current.y)) {
-                    Maze newState = new Maze(board[current.y][cx], newSteps);
-                    if (isValidState(newState)) {
-                        result[x + 2] = newState;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    public Maze makeMove(Maze to) {
-        currentState = to;
-        moves.add(currentState);
-
-        //todo: remove
-        print(to);
-
-        return to;
-    }
-
-
-    private int relativePosition(Cell me, Cell c) {
-        if (me.x == c.x) {
-            if (me.y < c.y) return NORTH;
-            if (me.y > c.y) return SOUTH;
-        } else if (me.y == c.y) {
-            if (me.x > c.x) return EAST;
-            if (me.x < c.x) return WEST;
-        }
+    public int solveMe() {
+        if (start == null || end == null) throw new RuntimeException("No start or end");
+        currentState = new MazeState(start, 0);
+        solve(currentState);
+        if (possible) return min;
         return -1;
     }
 
-    private Cell[] nearestObstacle(Cell c) {
-        Cell[] result = new Cell[4];
-        for (int y = c.y; y >= 0; y--) {
-            if (!board[y][c.x].isEmpty) {
-                result[NORTH] = board[y][c.x];
-                break;
+    @Override
+    public String toString() {
+        String result = "";
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[y].length; x++) {
+                if (board[y][x] instanceof Lazer) {
+                    int dir = (((Lazer) board[y][x]).direction + currentState.lazerState()) % 4;
+                    switch(dir) {
+                        case NORTH : result += " ^"; break;
+                        case EAST  : result += " >"; break;
+                        case SOUTH : result += " v"; break;
+                        case WEST  : result += " <";
+                    }
+                    continue;
+                }
+                String space = " ";
+                if (currentState.cell.equals(board[y][x])) {
+                    result += "[";
+                    space = "";
+                }
+                result += space + board[y][x].c;
+                if (currentState.cell.equals(board[y][x])) result += "]";
+
             }
-        }
-        for (int x = c.x; x < width; x++) {
-            if (!board[c.y][x].isEmpty) {
-                result[EAST] = board[c.y][x];
-                break;
-            }
-        }
-        for (int y = c.y; y < height; y++) {
-            if (!board[y][c.x].isEmpty) {
-                result[SOUTH] = board[y][c.x];
-                break;
-            }
-        }
-        for (int x = c.x; x >= 0; x--) {
-            if (!board[c.y][x].isEmpty)  {
-                result[WEST] = board[c.y][x];
-                break;
-            }
+            result += "\n";
         }
         return result;
     }
 
-    private boolean isVulnerable(Maze state) {
-        Cell cell = state.cell;
-        Cell[] neighbors = nearestObstacle(cell);
-        for (Cell c : neighbors) {
-            if (c == null) continue;
-            if (c instanceof Lazer) {
-                Lazer l = (Lazer) c;
-                int direction = (l.direction + state.lazerState()) % 4;
 
-                //todo:remove
-                System.out.println("Lazer direction: " + direction);
-                System.out.println("Relative direction: " + relativePosition(cell, l));
 
-                if (direction == relativePosition(cell, l)) return true;
-            }
-        }
-        return false;
-    }
-
-    private void solve(Maze start) {
-        Stack<Maze> path = new Stack<Maze>();
-        //Stack<Cell> fullPath = new Stack<Cell>();
-        path.push(start);
-        while(!path.isEmpty()) {
-            Maze state = path.pop();
-            makeMove(state);
-            if (state.cell.equals(end)) {
-                System.out.println("Total steps made: " + state.steps);
-                if (state.steps < min) {
-                    min = state.steps;
-                    possible = true;
-                }
-                continue;
-            }
-            Maze[] validMoves = validMoves(state);
-            for (Maze move : validMoves) {
-                if (move != null)
-                path.push(move);
-            }
-        }
-    }
-
+    //Initialize new maze from the input
     private void init(int h, int w, List<String> input) {
-        moves = new HashSet<Maze>();
+        visited = new HashMap<MazeState, MazeState>();
         height = h; width = w;
         board = new Cell[height][width];
         int y = 0;
@@ -189,133 +99,180 @@ public class LazerMaze {
         }
     }
 
-    public void print(Maze m) {
-        Cell current = m.cell;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (board[y][x] == current) {
-                    System.out.print("[" + board[y][x] + "]");
-                } else
+    //Exhaustive DFS seatch using a stack. Remembers minimal number of steps from all solutions
+    private void solve(MazeState start) {
+        Stack<MazeState> path = new Stack<MazeState>();
+        path.push(start);
 
-                    //todo:remove
-                    if (board[y][x] instanceof Lazer)
-                        System.out.print(" " + dirToChar((((Lazer) board[y][x]).direction + m.steps) % 4));
-                    else System.out.print(board[y][x] +"");
+        while(!path.isEmpty()) {
+            MazeState state = path.pop();
+            currentState = state;
+            makeMove(state);
+
+            System.out.println("\nExploring cell " + state.cell.x + "," + state.cell.y);
+            System.out.println("Steps made in this state: " + state.steps);
+            System.out.println("" + this);
+
+            if (state.cell.equals(end)) {
+                System.out.println("\tFinished in " + state.steps + " steps");
+                if (state.steps < min) {
+                    min = state.steps;
+                    possible = true;
+                }
             }
-            System.out.println();
+            MazeState[] validMoves = validMoves(state);
+            if (validMoves.length == 0 && !state.cell.equals(end)) {
+                System.out.println("Dead end at " + state.cell + "\n");
+            }
+            for (MazeState move : validMoves) {
+                if (move != null) {
+                    path.push(move);
+                }
+            }
         }
     }
 
-    //todo:remove
-    private char dirToChar(int dir) {
-        switch (dir) {
-            case 0 : return '^';
-            case 1 : return '>';
-            case 2 : return 'v';
-            case 3 : return '<';
-            default: return '^';
+    //Enumerate all possible moves from the current position/state
+    private MazeState[] validMoves(MazeState forState) {
+        int newSteps = forState.steps + 1;
+        Cell c = forState.cell;
+
+        List<MazeState> r = new ArrayList<MazeState>();
+
+        for (int y = -1; y < 2; y++) {
+            if (y != 0) {
+                int cy = c.y + y;
+                System.out.println("Checking " + board[cy][c.x]);
+                if (isValid(c.x, cy, newSteps)){
+                    MazeState newState = new MazeState(board[cy][c.x], newSteps);
+                    r.add(newState);
+                    System.out.println(newState + " is available");
+                }
+            }
         }
+
+        for (int x = -1; x < 2; x++) {
+            if (x != 0) {
+                int cx = c.x + x;
+                System.out.println("Checking " + board[c.y][cx]);
+                if (isValid(cx, c.y, newSteps)) {
+                    MazeState newState = new MazeState(board[c.y][cx], newSteps);
+                    r.add(newState);
+                    System.out.println(newState + " is available");
+                }
+            }
+        }
+        return r.toArray(new MazeState[r.size()]);
     }
 
-    public int solveMe() {
-        if (start == null || end == null) return -1;
-        allPaths = new ArrayList<Stack<Cell>>();
-        Stack<Maze> path = new Stack<Maze>();
-        solve(currentState);
-
-        return min;
+    //Check if the chosen cell is vulnerable to any of the adjacent lazers
+    private boolean isVulnerable(MazeState state) {
+        Cell cell = state.cell;
+        Cell[] neighbors = nearestObstacle(cell);
+        for (Cell c : neighbors) {
+            if (c == null) continue;
+            if (c instanceof Lazer) {
+                Lazer l = (Lazer) c;
+                //check if the new cell position will be located in the
+                //direction of the lazer if we are to make a step
+                int direction = (l.direction + state.lazerState()) % 4;
+                if (direction == relativePosition(cell, l)) {
+                    Cell ce = state.cell;
+                    System.out.println("Cell " + ce + " is vulnerable to " + l);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    static class Cell {
-        int x;
-        int y;
-        char c;
-        boolean isEmpty;
+    private boolean isValid(int x, int y, int steps) {
+        if ((x >= width || x < 0) ||
+                        (y >= height || y < 0)) return false;
+        MazeState state = new MazeState(board[y][x], steps);
+        if (state.cell.equals(end)) return true;
+        String xy = state.cell.x + "," + state.cell.y;
 
-        public Cell(char c, int x, int y, boolean isEmpty) {
-            this.c = c;
-            this.x = x;
-            this.y = y;
-            this.isEmpty = isEmpty;
-        }
+        //Check if this position has already been explored in a current state.
+        //To avoid getting stuck in an infinie loop moving back and forth, if
+        //the position has been explored but the previous path took more steps then
+        //the current one, replace it with the one with less steps and mark position available.
+        //Otherwise, mark position as unavailable.
+        MazeState previous = visited.get(state);
+        if (previous != null) {
+            System.out.println("Move " + xy + " has already been made");
+            if (previous.steps > state.steps) visited.put(state, state);
+            else return false;
 
-        public String coordinates() {
-            return String.format("%d,%d", y, x);
         }
-
-        @Override
-        public String toString() {
-            return String.format(" %s ", c+"");
-        }
+        return  (state.cell.isEmpty && !isVulnerable(state));
     }
 
-    static class Lazer extends Cell{
-        int direction;
-        public Lazer(char c, int x, int y,  int p) {
-            super(c, x, y, false);
-            direction = p;
-        }
 
-        public boolean equals(Object o) {
-            if (!(o instanceof Lazer)) return false;
-            Lazer l = (Lazer) o;
-            return (x == l.x && y == l.y && direction == l.direction);
-        }
-
-        public int hashCode() {
-            return String.valueOf("" + x + y + direction).hashCode();
-        }
-
-        @Override
-        public String toString() {
-            int direction = this.direction;
-            if (direction == LazerMaze.NORTH) return "^";
-            if (direction == LazerMaze.EAST) return ">";
-            if (direction == LazerMaze.SOUTH) return "v";
-            if (direction == LazerMaze.WEST) return "<";
-            return "?";
-        }
+    //Remember position and state as visited
+    private void makeMove(MazeState to) {
+        visited.put(to, to);
     }
 
-    static class Maze {
-        Cell cell;
-        int steps;
-
-        public Maze(Cell c, int s) {
-            cell = c;
-            steps = s;
+    //returns the position of the current cell (me) relative to the other.
+    // Used when calculating vulnerability : if  lazer.direction
+    //(adjusted to the number of steps in current state) == relativePosition(cell, lazer)
+    //cell is considered vulnerable and is excluded from valid moves
+    private int relativePosition(Cell me, Cell c) {
+        if (me.x == c.x) {
+            if (me.y < c.y) return NORTH;
+            if (me.y > c.y) return SOUTH;
+        } else if (me.y == c.y) {
+            if (me.x > c.x) return EAST;
+            if (me.x < c.x) return WEST;
         }
+        return -1;
+    }
 
-        public int lazerState() {
-            return steps % 4;
+    //Find the nearest non-empty cell surrounding the current one
+    private Cell[] nearestObstacle(Cell c) {
+        Cell[] result = new Cell[4];
+        for (int y = c.y - 1; y >= 0; y--) {
+            if (!board[y][c.x].isEmpty) {
+                result[NORTH] = board[y][c.x];
+                break;
+            }
         }
-
-        public boolean equals (Object o) {
-            if (!(o instanceof Maze)) return false;
-            Maze m = (Maze) o;
-            return (hashCode() == m.hashCode());
+        for (int x = c.x + 1; x < width; x++) {
+            if (!board[c.y][x].isEmpty) {
+                result[EAST] = board[c.y][x];
+                break;
+            }
         }
-
-        public int hashCode() {
-            return (""+ cell.x + cell.y + lazerState()).hashCode();
+        for (int y = c.y + 1; y < height; y++) {
+            if (!board[y][c.x].isEmpty) {
+                result[SOUTH] = board[y][c.x];
+                break;
+            }
         }
-
-        public String toString() {
-            return String.format("{%d,%d, %d}", cell.y, cell.x, lazerState());
+        for (int x = c.x - 1; x >= 0; x--) {
+            if (!board[c.y][x].isEmpty)  {
+                result[WEST] = board[c.y][x];
+                break;
+            }
         }
+        return result;
     }
 
     public static void main(String[] args) throws Exception {
-       /* if (args.length == 0) {
+        if (args.length == 0) {
             System.out.println("Please provide input file name as first argument");
             return;
-        }*/
-        String filename = "lmz.txt";
+        }
+
+        String filename = args[0];
         Scanner sc = null;
+        List<Integer> solutions = new ArrayList<Integer>();
+        List<List<String>> inputs = new ArrayList<List<String>>();
+
         try {
-            sc = new Scanner(new File(System.getProperty("user.dir") + "/src/" + filename));
+            sc = new Scanner(new File(System.getProperty("user.dir") +"/" + filename));
             int cases = Integer.parseInt(sc.nextLine().trim());
-            List<List<String>> inputs = new ArrayList<List<String>>();
             List<String> input = null;
             while (cases > 0) {
                 String[] s = sc.nextLine().split("\\s+");
@@ -332,25 +289,94 @@ public class LazerMaze {
                 }
                 cases--;
             }
-            List<String> tcase = inputs.get(4);
-            int h = tcase.size();
-            int w = tcase.get(0).length();
-            doTest(tcase, h, w);
-
         } finally {
             sc.close();
         }
 
-
-    }
-
-    private static void doTest(List<String> input, int h, int w) {
-        LazerMaze maze = new LazerMaze(h, w, input);
-        for (String s : input) {
-            System.out.println(s);
+        for (int x = 0; x < inputs.size(); x++) {
+            if (x != Integer.parseInt(args[1])) continue;
+            List<String> maze = inputs.get(x);
+            System.out.println("Solving case " + (x+1));
+            LazerMaze lazerMaze = new LazerMaze(maze.size(), maze.get(0).length(), maze);
+            int min = lazerMaze.solveMe();
+            System.out.println("Minimum steps : " + min);
+            solutions.add(min);
         }
-        maze.print(maze.currentState);
-        System.out.println("Minimum steps: " + maze.solveMe());
+
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new FileWriter
+                                             (new File(System.getProperty("user.dir")
+                                                                   + "/" + filename + ".out")));
+            for (int i = 0; i < solutions.size(); i++) {
+                int s = solutions.get(i);
+                pw.printf("Case #%d: %s\n", i+1, s == -1 ? "impossible" : s+"");
+            }
+        } finally {
+            pw.close();
+        }
+    }
+}
+
+class Cell {
+    int x;
+    int y;
+    char c;
+    boolean isEmpty;
+
+    public Cell(char c, int x, int y, boolean isEmpty) {
+        this.c = c;
+        this.x = x;
+        this.y = y;
+        this.isEmpty = isEmpty;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%d, %d ", x, y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Cell cell = (Cell) o;
+        return this.x == cell.x && this.y == cell.y;
+    }
+}
+
+class Lazer extends Cell{
+    int direction;
+    public Lazer(char c, int x, int y,  int p) {
+        super(c, x, y, false);
+        direction = p;
+    }
+}
+
+class MazeState {
+    Cell cell;
+    int steps;
+
+    public MazeState(Cell c, int s) {
+        cell = c;
+        steps = s;
+    }
+
+    public int lazerState() {
+        return steps % 4;
+    }
+
+    public boolean equals (Object o) {
+        if (!(o instanceof MazeState)) return false;
+        MazeState m = (MazeState) o;
+        //return hashCode() == m.hashCode();
+        return (cell.x == m.cell.x && cell.y == m.cell.y && lazerState() == m.lazerState());
+    }
+
+    public int hashCode() {
+        //return cell.x * 100 + cell.y * 10 + lazerState();
+        return ("#"+ cell.x + "#" + cell.y +  "#" + lazerState()).hashCode();
+    }
+
+    public String toString() {
+        return String.format("{%d,%d}", cell.y, cell.x);
+    }
 }
