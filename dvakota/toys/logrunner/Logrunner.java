@@ -8,7 +8,7 @@ import java.util.*;
  * Date: 11/7/14
  * DailyProgrammer Challenge #187 - Hard
  * Shortest path single-pair optimal network flow problem
- * Test runner (supports input from file as well as hardcoded values)
+ * LiftRunner runner (supports input from file as well as hardcoded values)
  */
 public class Logrunner {
     static int[] vertices = new int[26];
