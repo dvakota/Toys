@@ -70,14 +70,7 @@ public class LiftRunner {
             say("CALLS SERVED: " + lift.totalCalls + "\tTOTAL CAR TIMES: ");
             say("--------------");
             for (Car c : lift.cars) {
-                say("CAR " + c.id);
-                say("\tTIME: " + c.timeSpent + " SECONDS");
-                say("\tSpeed: " + c.floorSeconds + " seconds per floor");
-                say("\tCapacity: " + c.capacity);
-                say("\tTotal travel distance " + c.travelDistance + " floors");
-                if (c.waitTime > 0) say("\tWait time: " + c.waitTime);
-                say("\tAverage speed: " + String.format("%.2f", (double) (c.timeSpent) / c.travelDistance)
-                                + " seconds per floor");
+                reportCar(c);
                 if (c.timeSpent < minF) {
                     minF = c.timeSpent;
                     fastest = c;
@@ -103,14 +96,14 @@ public class LiftRunner {
         fastest = winner.fastestCar;
         reportCar(fastest);
 
-        say("\n****** Most efficient (least floor travelled)*****\n");
+        say("\n****** Most efficient (least floors travelled)*****\n");
         reportCar(efficient);
     }
 
     private static void reportCar(Car car) {
         say("\tCar \t" + car.id);
         say("\t\tTime spent: \t" + car.timeSpent + " seconds (" + car.timeSpent / 60 + " min "
-                    + car.timeSpent % 60 + " sec)");;
+                        + car.timeSpent % 60 + " sec)");;
         say("\t\tSpeed: \t" + car.floorSeconds + " second per floor");
         say("\t\tAverage speed: \t" +
                         String.format("%.2f", (double) (car.timeSpent) / car.travelDistance)
@@ -118,6 +111,5 @@ public class LiftRunner {
         say("\t\tCapacity: \t" + car.capacity);
         say("\t\tWaiting time: \t" + car.waitTime);
         say("\t\tFloors travelled: \t" + car.travelDistance);
-
     }
 }

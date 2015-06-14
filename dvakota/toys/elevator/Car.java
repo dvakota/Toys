@@ -102,7 +102,6 @@ public class Car {
 
             if (current > maxFloor) current = maxFloor;
 
-
             direction = Lift.DOWN;
             say("\n\tDING! TRAVELLING DOWN\n");
             while(!downQue.isEmpty() && current >= minFloor) {
@@ -112,6 +111,7 @@ public class Car {
                 move(direction);
             }
         }
+
         say("TOTAL TIME: " + timeSpent / 60 + " MINUTES " + timeSpent % 60 + " SECONDS");
     }
 
@@ -129,11 +129,14 @@ public class Car {
         //Elevator will stop and wait only on the pressed floors
         linger();
 
-        for (Request req = waiting.peek(); req != null && req.timePoint <= timeSpent;
+        for (Request req = waiting.peek();
+             req != null && req.timePoint <= timeSpent;
              req = waiting.peek()) {
             say("\tStopping for passenger " + req.id + "(going from " +
                             req.from + " to " + req.to +")");
+
             Request r  = waiting.poll();
+
             if ((floor == r.to) && (floor == r.from)) {
                 say("\tPassenger " + req.id + ", you are an idiot. " +
                                 "You are already on floor " + floor);
@@ -176,7 +179,6 @@ public class Car {
                 r.timePoint = timeSpent;
                 calls.offer(r);
             }
-
         }
 
         if (off.size() > 0) say(off.size() + " passengers got off");
@@ -192,6 +194,7 @@ public class Car {
         if (waitTime > 0) say("Elevator waiting for " + waitTime + " seconds");
         timeSpent += waitTime;
     }
+
     private void move(int direction) {
         current += direction;
         if (current <= maxFloor && current >= minFloor) {

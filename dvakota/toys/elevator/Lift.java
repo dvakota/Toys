@@ -10,7 +10,7 @@ public class Lift {
     static final int UP = 1;
     static final int DOWN = -1;
 
-    //future - dispatch calls between cars; currently nothing
+    //future - dispatch calls among multiple cars; currently nothing
     interface CarDispatcher {
         public String dispatchToCar(Request call);
     }
@@ -57,7 +57,7 @@ public class Lift {
         if (c != null && time > 0) c.waitTime = time;
     }
 
-    public void dispatchCall(Request call) {
+    private void dispatchCall(Request call) {
         if (carDispatcher == null) {
             for (Car car : cars) car.calls.offer(call);
         } else {
