@@ -216,7 +216,8 @@ public class Car {
                 //existing rider pressed another floor
                 say("\tPassenger " + req.id + " is now going to " + req.to);
                 riders.get(req.id).to = req.to;
-                req.from = riders.get(req.id).from;
+                riders.get(req.id).from = req.from = current;
+                //req.from = riders.get(req.id).from;
                 req.toFloor = req.to;
             }
 
