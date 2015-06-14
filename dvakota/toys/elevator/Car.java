@@ -182,7 +182,7 @@ public class Car {
         }
 
         if (off.size() > 0) say(off.size() + " passengers got off");
-        if (on.size() > 0) say(on.size() + " passengers got on");
+        if (on.size() > 0) say((on.size()-leftover) + " passengers got on");
         if (leftover > 0)
             say(leftover + " passengers are left behind :(");
         say("Car " + id + " is going " + (direction == Lift.UP ? "UP" : "DOWN")
@@ -217,7 +217,7 @@ public class Car {
                 say("\tPassenger " + req.id + " is now going to " + req.to);
                 riders.get(req.id).to = req.to;
                 riders.get(req.id).from = req.from = current;
-                //req.from = riders.get(req.id).from;
+                req.timePoint = timeSpent;
                 req.toFloor = req.to;
             }
 
