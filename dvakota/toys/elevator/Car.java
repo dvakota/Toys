@@ -49,6 +49,7 @@ public class Car {
     int maxFloor;
 
     int waitTime;
+    int travelDistance;
 
     PriorityHash<Integer, Request> upQue;
     PriorityHash<Integer, Request> downQue;
@@ -159,6 +160,7 @@ public class Car {
             Request r = on.get(s);
             if (capacity > riders.size()) {
                 r.toFloor = r.to;
+                r.timePoint = timeSpent;
                 riders.put(s, r);
                 say("\tLoading passenger " + r.id + " going from " + floor + " to " + r.toFloor);
                 if (r.toFloor > floor) upQue.add(r.toFloor, r);
@@ -167,12 +169,14 @@ public class Car {
                 //capacity exceeded, passengers will have to wait
                 say("Cabin over capacity! Sorry, " + r.id + " (from " +
                                 r.from + " to " + r.to +")");
+                leftover++;
+
                 //will have to re-enqueue the leftover passengers
                 //accounting for "Wasted" time (new timePoint)
                 r.timePoint = timeSpent;
                 calls.offer(r);
-                leftover++;
             }
+
         }
 
         if (off.size() > 0) say(off.size() + " passengers got off");
@@ -190,8 +194,10 @@ public class Car {
     }
     private void move(int direction) {
         current += direction;
-        if (current <= maxFloor && current >= minFloor)
+        if (current <= maxFloor && current >= minFloor) {
             timeSpent += floorSeconds;
+            travelDistance++;
+        }
     }
 
     private void dispatch() {

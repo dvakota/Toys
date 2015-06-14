@@ -25,34 +25,26 @@ public class LiftRunner {
             list.add(ride);
         }
 
-        Car car1 = new Car("C1", 12, 0.1f, 1);
-        Car car2 = new Car("C2", 12, 0.2f, 1);
+        Car car = new Car("Control", 12, 0.1f, 1);
+        Car fastCar = new Car("FastCar", 12, 0.2f, 1);
+        Car bigCar = new Car("BigCar", 20,0.1f, 1);
+        Car waitingCar = new Car("WaitingCar", 12, 0.1f, 1);
+        waitingCar.waitTime = 2;
 
-        Lift elevator = new Lift();
+        Lift elevator = new Lift("Control");
 
-        elevator.prepare(1, 12, copyList(list), car1, car2);
+        elevator.prepare(1, 12, copyList(list), car);
 
-        Lift waitingElevator = new Lift();
-        Car wcar1 = new Car("C1", 12, 0.1f, 1);
-        Car wcar2 = new Car("C2", 12, 0.2f, 1);
+        Lift fastElevator = new Lift("FAST");
+        fastElevator.prepare(1, 12, copyList(list), fastCar);
 
-        waitingElevator.prepare(1, 12, copyList(list), wcar1, wcar2);
-        waitingElevator.setName("WaitingElevator");
-        waitingElevator.setCarWaitTime("C2", 1);
+        Lift bigElevator = new Lift("BIG");
+        bigElevator.prepare(1, 12, copyList(list), bigCar);
 
-        Car fastCar = new Car("C1", 12, 0.5f, 1);
-        Car slowCar  = new Car("C2", 12, 0.150f, 1);
-        Lift fastElevator = new Lift();
-        fastElevator.prepare(1, 12, copyList(list), fastCar, slowCar);
-        fastElevator.setName("FastElevator");
+        Lift waitingElevator = new Lift("WAITING");
+        waitingElevator.prepare(1, 12, copyList(list), waitingCar);
 
-        Car bigCar = new Car("C1", 15, 0.1f, 1);
-        Car smallCar = new Car("C2", 12, 0.1f, 1);
-        Lift bigElevator = new Lift();
-        bigElevator.prepare(1, 12, copyList(list), bigCar, smallCar);
-        bigElevator.setName("BigElevator");
-
-        report(elevator, waitingElevator, fastElevator, bigElevator);
+        report(elevator, fastElevator, bigElevator, waitingElevator);
     }
 
     private static List<Request> copyList(List<Request> src) {
@@ -68,10 +60,10 @@ public class LiftRunner {
         for (Lift lift : elevators) {
             lift.go();
         }
-
+        Car fastest = null;
+        Car efficient = null;
         for (Lift lift: elevators) {
-            int min = Integer.MAX_VALUE;
-            Car fastest = null;
+            int minF, minE; minF= minE = Integer.MAX_VALUE;
 
             say("--------------");
             say("Elevator " + lift.name);
@@ -82,16 +74,23 @@ public class LiftRunner {
                 say("\tTIME: " + c.timeSpent + " SECONDS");
                 say("\tSpeed: " + c.floorSeconds + " seconds per floor");
                 say("\tCapacity: " + c.capacity);
+                say("\tTotal travel distance " + c.travelDistance + " floors");
                 if (c.waitTime > 0) say("\tWait time: " + c.waitTime);
-                if (c.timeSpent < min) {
-                    min = c.timeSpent;
+                say("\tAverage speed: " + String.format("%.2f", (double) (c.timeSpent) / c.travelDistance)
+                                + " seconds per floor");
+                if (c.timeSpent < minF) {
+                    minF = c.timeSpent;
                     fastest = c;
+                }
+                if (c.travelDistance < minE) {
+                    minE = c.travelDistance;
+                    efficient = c;
                 }
             }
             lift.fastestCar = fastest;
         }
 
-        say("\n*******Fastest time:*********");
+        say("\n******* Best time *********\n");
         int min = Integer.MAX_VALUE;
         Lift winner = null;
         for (Lift lift : elevators) {
@@ -101,13 +100,24 @@ public class LiftRunner {
             }
         }
 
-        Car fastest = winner.fastestCar;
-        say("WINNER: " + winner.name + "\tTIME " + fastest.timeSpent
-                        +" seconds (" + fastest.timeSpent / 60 + " min "
-                        + fastest.timeSpent % 60 + " sec)");
-        say("\tCar " + fastest.id);
-        say("\t\tSpeed: " + fastest.floorSeconds + " second per floor");
-        say("\t\tCapacity: " + fastest.capacity);
-        say("\t\tWaiting time: " + fastest.waitTime);
+        fastest = winner.fastestCar;
+        reportCar(fastest);
+
+        say("\n****** Most efficient (least floor travelled)*****\n");
+        reportCar(efficient);
+    }
+
+    private static void reportCar(Car car) {
+        say("\tCar \t" + car.id);
+        say("\t\tTime spent: \t" + car.timeSpent + " seconds (" + car.timeSpent / 60 + " min "
+                    + car.timeSpent % 60 + " sec)");;
+        say("\t\tSpeed: \t" + car.floorSeconds + " second per floor");
+        say("\t\tAverage speed: \t" +
+                        String.format("%.2f", (double) (car.timeSpent) / car.travelDistance)
+                        + " seconds per floor");
+        say("\t\tCapacity: \t" + car.capacity);
+        say("\t\tWaiting time: \t" + car.waitTime);
+        say("\t\tFloors travelled: \t" + car.travelDistance);
+
     }
 }

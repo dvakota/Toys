@@ -10,7 +10,7 @@ public class Lift {
     static final int UP = 1;
     static final int DOWN = -1;
 
-    //future - dispatch calls between 2 cars
+    //future - dispatch calls between cars; currently nothing
     interface CarDispatcher {
         public String dispatchToCar(Request call);
     }
@@ -22,6 +22,12 @@ public class Lift {
     Car fastestCar;
 
     CarDispatcher carDispatcher;
+
+    public Lift(){}
+
+    public Lift(String n) {
+        this.name = n;
+    }
 
     public void prepare(int minFloor, int maxFloor, List<Request> riders, Car...crs) {
         say("Initializing Elevator...");
@@ -40,10 +46,6 @@ public class Lift {
         say(cars.size() + " cars; " + calls.size() + " requests waiting");
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void setCarWaitTime(String carId, int time) {
         Car c = null;
         for (Car car : cars) {
@@ -57,7 +59,6 @@ public class Lift {
 
     public void dispatchCall(Request call) {
         if (carDispatcher == null) {
-            //select the car randomly for now
             for (Car car : cars) car.calls.offer(call);
         } else {
             carDispatcher.dispatchToCar(call);
