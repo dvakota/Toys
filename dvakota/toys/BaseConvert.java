@@ -15,6 +15,7 @@ public class BaseConvert {
         if (srcBase == 10) return Integer.parseInt(number);
 
         int result = 0;
+
         for (int i = number.length(); i >= 0; i--) {
             int remainder = number.charAt(i);
             int val;
@@ -23,23 +24,24 @@ public class BaseConvert {
             else
                 val = remainder - 'a' + 10;
             result = (val * (int) Math.pow(srcBase, number.length() - i)) + result;
-
-            System.out.println(result);
         }
+
         return result;
     }
 
-    static String toTargetBase(int numberInBase10, int targetBase) {
-        if (targetBase == 10) return numberInBase10 + "";
+    static String toTargetBase(int numValue, int targetBase) {
+        if (targetBase == 10) return numValue + "";
+
         String result = "";
-        for (int i = 0; numberInBase10 > 0; i++) {
-            int remainder = numberInBase10 % targetBase;
+
+        for (int i = 0; numValue > 0; i++) {
+            int remainder = numValue % targetBase;
             if (remainder > 9) {
                 result = (char) ((remainder - 10) + 'a') + result;
             } else {
                 result = remainder + result;
             }
-            numberInBase10 /= targetBase;
+            numValue /= targetBase;
         }
         return result;
     }
