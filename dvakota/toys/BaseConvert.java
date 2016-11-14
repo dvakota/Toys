@@ -1,4 +1,4 @@
-package gk.training;
+package dvakota.toys;
 
 /**
  * Date: 11/13/16
@@ -35,7 +35,7 @@ public class BaseConvert {
         for (int i = 0; numberInBase10 > 0; i++) {
             int remainder = numberInBase10 % targetBase;
             if (remainder > 9) {
-                result = String.valueOf((char) ((remainder - 10) + 'a')) + result;
+                result = (char) ((remainder - 10) + 'a') + result;
             } else {
                 result = remainder + result;
             }
@@ -45,7 +45,7 @@ public class BaseConvert {
     }
 
     public static void main(String[] args) {
-        String num = "33";
+        String num = "433";
         int src = 10;
         int trg = 16;
         say(convert(num, src, trg));
